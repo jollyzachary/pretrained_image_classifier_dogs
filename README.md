@@ -13,7 +13,6 @@ The project requires the following software:
 - Python 3
 - PyTorch and TorchVision
 - PIL
-- Numpy
 
 ## Command Line Application
 
