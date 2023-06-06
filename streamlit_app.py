@@ -1,26 +1,51 @@
 import streamlit as st
 from PIL import Image
 from classifier import classifier
+import cv2
+import numpy as np
 
 # Set the title of the app
 st.title('Dog Breed Classifier')
 
-# Allow the user to upload an image file
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+# Add a select box for the model selection
+model_name = st.selectbox('Choose a model:', ('resnet', 'alexnet', 'vgg'))
 
-if uploaded_file is not None:
+# Add an explanation of the chosen model
+if model_name == 'resnet':
+    st.write("ResNet is a convolutional neural network that is 50 layers deep. It's a highly accurate model, but it can be slower and require more computational resources than other models.")
+elif model_name == 'alexnet':
+    st.write("AlexNet is a convolutional neural network that is 8 layers deep. It's less accurate than some other models, but it's faster and requires less computational resources.")
+else:  # vgg
+    st.write("VGG is a convolutional neural network that is 16 or 19 layers deep. It's a highly accurate model, but it's slower and requires more computational resources than other models.")
+
+# Allow the user to upload multiple image files
+uploaded_files = []
+for i in range(3):  # Allow up to 3 images
+    uploaded_file = st.file_uploader(f"Choose image {i+1}...", type="jpg", key=i)
+    if uploaded_file is not None:
+        uploaded_files.append(uploaded_file)
+
+# Process each uploaded image
+for i, uploaded_file in enumerate(uploaded_files):
     # Open the image file
     img = Image.open(uploaded_file)
     # Display the uploaded image
-    st.image(img, caption='Uploaded Image.', use_column_width=True)
+    st.image(img, caption=f'Uploaded Image {i+1}.', use_column_width=True)
 
     # Save the uploaded image to a temporary file and get the path of the file
-    img_path = 'temp.jpg'
+    img_path = f'temp{i}.jpg'
     img.save(img_path)
 
     # Predict the breed of the dog in the image
-    # You can choose the model you want to use here
-    breed = classifier(img_path, 'resnet')
+    breed, confidence = classifier(img_path, model_name)
 
-    # Display the predicted breed
-    st.write("Predicted breed: ", breed)
+    # Display the predicted breed and the confidence score
+    st.write(f"Predicted breed for image {i+1}: {breed} (Confidence: {confidence*100:.2f}%)")
+
+    # Image manipulation
+    brightness = st.slider('Brightness', min_value=0.0, max_value=2.0, value=1.0, step=0.1, key=f'brightness{i}')
+    contrast = st.slider('Contrast', min_value=0.0, max_value=2.0, value=1.0, step=0.1, key=f'contrast{i}')
+    img_cv = cv2.imread(img_path)
+    img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+    img_cv = np.clip(contrast * img_cv + brightness, 0, 255).astype(np.uint8)
+    st.image(img_cv, caption=f'Manipulated Image {i+1}.', use_column_width=True)
