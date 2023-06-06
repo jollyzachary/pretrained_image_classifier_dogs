@@ -1,37 +1,32 @@
 import streamlit as st
+import pandas as pd
 from PIL import Image
 from classifier import classifier
 
 # Set the title of the app
 st.title('Dog Breed Classifier')
 
+# Initialize session state for the prediction history
+if 'history' not in st.session_state:
+    st.session_state['history'] = []
+
 # Add a select box for the model selection
 model_name = st.selectbox('Choose a model:', ('resnet', 'alexnet', 'vgg'))
 
 # Add an explanation of the chosen model
 if model_name == 'resnet':
-    st.write("""
-    ResNet is a convolutional neural network that is 50 layers deep. It's a highly accurate model, but it can be slower and require more computational resources than other models. ResNet uses a special "shortcut" or "skip connection" to reduce the training error and complexity of the model. This makes it a powerful choice for complex image recognition tasks.
-    """)
+    st.write("ResNet is a convolutional neural network that is 50 layers deep. It's a highly accurate model, but it can be slower and require more computational resources than other models.")
 elif model_name == 'alexnet':
-    st.write("""
-    AlexNet is a convolutional neural network that is 8 layers deep. It's less accurate than some other models, but it's faster and requires less computational resources. AlexNet uses ReLU (Rectified Linear Unit) for the non-linear part, which helps it train much faster than models using sigmoid or tanh functions. It's a good choice for tasks where speed is a priority.
-    """)
+    st.write("AlexNet is a convolutional neural network that is 8 layers deep. It's less accurate than some other models, but it's faster and requires less computational resources.")
 else:  # vgg
-    st.write("""
-    VGG is a convolutional neural network that is 16 or 19 layers deep. It's a highly accurate model, but it's slower and requires more computational resources than other models. VGG uses small 3x3 filters in its convolutional layers, which helps it capture finer level properties of the image. It's often considered to get the predictions better and is a good choice for tasks where accuracy is a priority.
-    """)
-    
+    st.write("VGG is a convolutional neural network that is 16 or 19 layers deep. It's a highly accurate model, but it's slower and requires more computational resources than other models.")
+
 # Allow the user to upload multiple image files
 uploaded_files = []
-for i in range(4):  # Allow up to 4 images
+for i in range(3):  # Allow up to 3 images
     uploaded_file = st.file_uploader(f"Choose image {i+1}...", type="jpg", key=i)
     if uploaded_file is not None:
         uploaded_files.append(uploaded_file)
-        
-# Initialize session state for the prediction history
-if 'history' not in st.session_state:
-    st.session_state['history'] = []
 
 # Process each uploaded image
 for i, uploaded_file in enumerate(uploaded_files):
@@ -46,19 +41,21 @@ for i, uploaded_file in enumerate(uploaded_files):
 
     # Predict the breed of the dog in the image
     breed, confidence = classifier(img_path, model_name)
-    
+
     # Add the prediction to the history
     st.session_state['history'].append((model_name, breed, confidence))
 
     # Display the predicted breed and the confidence score
-    st.write(f"Predicted breed for image {i+1}: {breed}")
-    st.write(f"Confidence in prediction: {confidence*100:.2f}%")
-   
+    st.write(f"Predicted breed for image {i+1}: {breed} (Confidence: {confidence*100:.2f}%)")
+
 # Add a checkbox to toggle the prediction history
 if st.checkbox('Show prediction history'):
-    # Create a DataFrame from the prediction history
-    history_df = pd.DataFrame(st.session_state['history'], columns=['Model', 'Breed', 'Confidence'])
+    # Check if the history is not empty
+    if st.session_state['history']:
+        # Create a DataFrame from the history list
+        history_df = pd.DataFrame(st.session_state['history'], columns=['Model', 'Breed', 'Confidence'])
+        # Display the history DataFrame
+        st.dataframe(history_df)
+    else:
+        st.write('No prediction history')
 
-    # Display the prediction history in the sidebar
-    st.sidebar.table(history_df)
- 
