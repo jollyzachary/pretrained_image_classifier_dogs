@@ -1,8 +1,6 @@
 import streamlit as st
 from PIL import Image
 from classifier import classifier
-import cv2
-import numpy as np
 
 # Set the title of the app
 st.title('Dog Breed Classifier')
@@ -42,10 +40,3 @@ for i, uploaded_file in enumerate(uploaded_files):
     # Display the predicted breed and the confidence score
     st.write(f"Predicted breed for image {i+1}: {breed} (Confidence: {confidence*100:.2f}%)")
 
-    # Image manipulation
-    brightness = st.slider('Brightness', min_value=0.0, max_value=2.0, value=1.0, step=0.1, key=f'brightness{i}')
-    contrast = st.slider('Contrast', min_value=0.0, max_value=2.0, value=1.0, step=0.1, key=f'contrast{i}')
-    img_cv = cv2.imread(img_path)
-    img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
-    img_cv = np.clip(contrast * img_cv + brightness, 0, 255).astype(np.uint8)
-    st.image(img_cv, caption=f'Manipulated Image {i+1}.', use_column_width=True)
