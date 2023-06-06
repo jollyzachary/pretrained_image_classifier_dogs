@@ -28,6 +28,10 @@ for i in range(4):  # Allow up to 4 images
     uploaded_file = st.file_uploader(f"Choose image {i+1}...", type="jpg", key=i)
     if uploaded_file is not None:
         uploaded_files.append(uploaded_file)
+        
+# Initialize session state for the prediction history
+if 'history' not in st.session_state:
+    st.session_state['history'] = []
 
 # Process each uploaded image
 for i, uploaded_file in enumerate(uploaded_files):
@@ -45,7 +49,6 @@ for i, uploaded_file in enumerate(uploaded_files):
     
     # Add the prediction to the history
     st.session_state['history'].append((model_name, breed, confidence))
-
 
     # Display the predicted breed and the confidence score
     st.write(f"Predicted breed for image {i+1}: {breed}")
