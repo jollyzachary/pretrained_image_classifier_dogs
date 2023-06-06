@@ -38,5 +38,5 @@ for i, uploaded_file in enumerate(uploaded_files):
     breed, confidence = classifier(img_path, model_name)
 
     # Display the predicted breed and the confidence score
-    st.write(f"Predicted breed for image {i+1}: {breed} (Confidence: {confidence*100:.2f}%)")
-
+    st.write(f"Predicted breed for image {i+1}: {breed}")
+    st.write(f"Confidence in prediction: {confidence*100:.2f}%")
