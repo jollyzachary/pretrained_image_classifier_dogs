@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 from torch.autograd import Variable
 import torchvision.models as models
 from torch import __version__
+import torch.nn.functional as F  # Import the softmax function
 
 resnet18 = models.resnet18(pretrained=True)
 alexnet = models.alexnet(pretrained=True)
@@ -68,7 +69,14 @@ def classifier(img_path, model_name):
         # apply data to model
         output = model(data)
 
+    # Apply softmax to output to get probabilities
+    probabilities = F.softmax(output.data, dim=1)
+
     # return index corresponding to predicted class
     pred_idx = output.data.numpy().argmax()
 
-    return imagenet_classes_dict[pred_idx]
+    # Get confidence score for predicted class
+    confidence = probabilities.data.numpy()[0, pred_idx]
+
+    return imagenet_classes_dict[pred_idx], confidence
+
